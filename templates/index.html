@@ -1,0 +1,31 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+</head>
+<body>
+    <h1>Detected QR Codes:</h1>
+    <ul id="qr-codes-list">
+        {% for qr_code in qr_codes %}
+            <li>{{ qr_code }}</li>
+        {% endfor %}
+    </ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Connect to the WebSocket server
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Function to update QR codes list
+        socket.on('new_qr_code', function(qr_code) {
+            var list = document.getElementById('qr-codes-list');
+            var listItem = document.createElement('li');
+            listItem.appendChild(document.createTextNode(qr_code));
+            list.appendChild(listItem);
+        });
+    </script>
+</body>
+</html>
