@@ -2,6 +2,7 @@ import threading
 
 import cv2
 import numpy as np
+import pandas as pd
 import requests
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -22,15 +23,24 @@ def submit_qr_code():
     if data not in detected_qr_codes:
         detected_qr_codes.append(data)
         socketio.emit('new_qr_code', data)  
+        # Save QR code data to Excel file
+        save_qr_code_to_excel(data)
     return 'OK', 200
 
 def send_qr_code_to_server(data):
     url = 'http://localhost:5000/submit_qr_code'
     response = requests.post(url, data={'data': data})
-    if response.status_code == 200:
-        print("Data sent to server successfully.")
-    else:
-        print("Failed to send data to server.")
+    # if response.status_code == 200:
+        # print("Data sent to server successfully.")
+    # else:
+        # print("Failed to send data to server.")
+
+def save_qr_code_to_excel(data):
+    # Parse QR code data and create DataFrame
+    qr_data = eval(data)
+    df = pd.DataFrame([qr_data])
+    # Save DataFrame to Excel file
+    df.to_excel('qr_code_data.xlsx', index=False)
 
 def scan_qr_codes():
     cap = cv2.VideoCapture(0)
