@@ -29,8 +29,8 @@
             align-items: center;
         }
         #qr-code-img {
-            width: 100px; /* Adjust size as needed */
-            height: 100px; /* Adjust size as needed */
+            width: 100px;
+            height: 100px;
             border: 2px solid #333;
             border-radius: 5px;
             margin-bottom: -10px;
@@ -48,39 +48,32 @@
             border-radius: 8px;
             overflow: hidden;
         }
-
         h3 {
             text-align: center;
             color: #333;
             margin-top: 20px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
-
         th, td {
             padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
         }
-
         th {
             background-color: #f4f4f4;
             color: #333;
             font-weight: bold;
         }
-
         tr {
             background-color: #f9f9f9;
         }
-
         tr:nth-child(even) {
             background-color: #f1f1f1;
         }
-
         tr:hover {
             background-color: #f5f5f5;
         }
@@ -88,11 +81,7 @@
 </head>
 <body>
     <h1>Detected QR Codes:</h1>
-    <ul id="qr-codes-list">
-        {% for qr_code in qr_codes %}
-            <li>{{ qr_code }}</li>
-        {% endfor %}
-    </ul>
+    <ul id="qr-codes-list"></ul>
 
     <div id="qr-code-container">
         <img id="qr-code-img" src="source.png" alt="QR Code Image">
@@ -100,40 +89,70 @@
     </div>
 
     <div class="table">
-        {% if qr_data %}
-        <table>
+        <h3>QR Code Data Table</h3>
+        <table id="data-table">
             <thead>
                 <tr>
-                    {% for key in qr_data.columns %}
-                    <th>{{ key }}</th>
-                    {% endfor %}
+                    <th>product_id</th>
+                    <th>product_name</th>
+                    <th>category</th>
+                    <th>date_of_manufacture</th>
+                    <th>expiry_date</th>
+                    <th>batch_number</th>
+                    <th>batch_size</th>
+                    <th>source_location</th>
+                    <th>certification</th>
+                    <th>stock_level</th>
+                    <th>order_id</th>
+                    <th>customer_id</th>
+                    <th>timestamp</th>
                 </tr>
             </thead>
             <tbody>
-                {% for index, row in qr_data.iterrows() %}
-                <tr>
-                    {% for key, value in row.items() %}
-                    <td>{{ value }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
             </tbody>
         </table>
-        {% endif %}
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script>
-        // Connect to the WebSocket server
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-        // Function to update QR codes list
-        socket.on('new_qr_code', function(qr_code) {
-            var list = document.getElementById('qr-codes-list');
-            var listItem = document.createElement('li');
-            listItem.appendChild(document.createTextNode(qr_code));
-            list.appendChild(listItem);
+        socket.on('new_qr_code', function(data) {
+            var tableBody = document.querySelector('#data-table tbody');
+            var tr = document.createElement('tr');
+            for (var key in data) {
+                var td = document.createElement('td');
+                td.appendChild(document.createTextNode(data[key]));
+                tr.appendChild(td);
+            }
+            tableBody.appendChild(tr);
         });
+
+        function loadExcelData() {
+            fetch('qr_code_data.xlsx')
+                .then(response => response.arrayBuffer())
+                .then(data => {
+                    var workbook = XLSX.read(data, {type: 'array'});
+                    var sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    var jsonData = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                    var tableBody = document.querySelector('#data-table tbody');
+                    tableBody.innerHTML = '';
+
+                    for (var i = 1; i < jsonData.length; i++) {
+                        var tr = document.createElement('tr');
+                        jsonData[i].forEach(cell => {
+                            var td = document.createElement('td');
+                            td.appendChild(document.createTextNode(cell));
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    }
+                });
+        }
+
+        loadExcelData();
     </script>
 </body>
 </html>
