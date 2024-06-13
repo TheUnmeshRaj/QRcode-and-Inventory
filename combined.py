@@ -1,63 +1,78 @@
 import cv2
-import zbarlight
-import json
-import openpyxl
-from flask import Flask, send_from_directory
-from flask_socketio import SocketIO, emit
-import threading
+import numpy as np
+import serial
+import time
+from pyzbar.pyzbar import decode
 
-app = Flask(__name__)
-socketio = SocketIO(app)
+# Initialize serial communication with Arduino
+arduino = serial.Serial('COM5', 9600, timeout=1)  # Ensure 'COM5' is the correct port
+time.sleep(2)  # Wait for the serial connection to initialize
 
-excel_file = 'qr_code_data.xlsx'
-excel_columns = [
-    "product_id", "product_name", "category", "date_of_manufacture", "expiry_date", 
-    "batch_number", "batch_size", "source_location", "certification", 
-    "stock_level", "order_id", "customer_id", "timestamp"
-]
+# Function to rotate the motor
+def rotate_motor(command):
+    if arduino:
+        try:
+            arduino.write(command.encode())  # Send command to Arduino
+            print(f"Motor rotation command '{command}' sent to Arduino")
+        except Exception as e:
+            print("Error sending command to Arduino:", e)
+    else:
+        print("Arduino not initialized. Motor control not possible.")
 
-def update_excel(data):
-    workbook = openpyxl.load_workbook(excel_file)
-    sheet = workbook.active
-    row = [data[col] for col in excel_columns]
-    sheet.append(row)
-    workbook.save(excel_file)
-
+# Function to scan QR codes
 def scan_qr_codes():
     cap = cv2.VideoCapture(0)
+    
+    if not cap.isOpened():
+        print("Error: Could not open webcam.")
+        return
+
+    detected_qr_codes_set = set()
+
     while True:
         ret, frame = cap.read()
         if not ret:
-            continue
+            print("Error: Could not read frame.")
+            break
         
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        qr_codes = zbarlight.scan_codes('qrcode', gray)
-        if qr_codes:
-            for qr_code in qr_codes:
-                qr_data = qr_code.decode('utf-8')
-                try:
-                    data = eval(qr_data)
-                    if isinstance(data, dict):
-                        update_excel(data)
-                        socketio.emit('new_qr_code', data)
-                except Exception as e:
-                    print(f"Failed to decode QR code data: {e}")
+        decoded_objects = decode(frame)
+        
+        for obj in decoded_objects:
+            qr_data = obj.data.decode('utf-8')
+            
+            if qr_data in detected_qr_codes_set:
+                continue
+            
+            detected_qr_codes_set.add(qr_data)
+            
+            print(f"Data: {qr_data}")
+            
+            # Rotate motor to 180 degrees
+            rotate_motor('R')
+            time.sleep(5)  # Wait for 5 seconds
+            # Rotate motor back to 0 degrees
+            rotate_motor('O')
+        
+        for obj in decoded_objects:
+            points = obj.polygon
+            if len(points) > 4: 
+                hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
+                hull = list(map(tuple, np.squeeze(hull)))
+            else:
+                hull = points
+            
+            n = len(hull)
+            for j in range(0, n):
+                cv2.line(frame, hull[j], hull[(j+1) % n], (0, 255, 0), 3)
+        
         cv2.imshow('QR Code Scanner', frame)
+        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    
     cap.release()
     cv2.destroyAllWindows()
+    arduino.close()
 
-@app.route('/')
-def index():
-    return send_from_directory('', 'index.html')
-
-@app.route('/qr_code_data.xlsx')
-def download_excel():
-    return send_from_directory('', excel_file)
-
-if __name__ == "__main__":
-    thread = threading.Thread(target=scan_qr_codes)
-    thread.start()
-    socketio.run(app)
-
+if __name__ == '__main__':
+    scan_qr_codes()
