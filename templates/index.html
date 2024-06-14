@@ -1,16 +1,71 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        #qr-codes-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #qr-codes-list li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .qr-data {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .qr-data div {
+            flex: 1;
+            padding: 0 10px;
+            text-align: left;
+        }
+
+        .qr-data div:first-child {
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        .qr-data div:last-child {
+            text-align: left;
+            padding-left: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Detected QR Codes:</h1>
     <ul id="qr-codes-list">
         {% for qr_code in qr_codes %}
-            <li>{{ qr_code }}</li>
+            <li>
+                <div class="qr-data">
+                    {% for data in qr_code.split(':') %}
+                        <div>{{ data }}</div>
+                    {% endfor %}
+                </div>
+            </li>
         {% endfor %}
     </ul>
 
@@ -23,7 +78,17 @@
         socket.on('new_qr_code', function(qr_code) {
             var list = document.getElementById('qr-codes-list');
             var listItem = document.createElement('li');
-            listItem.appendChild(document.createTextNode(qr_code));
+            var qrData = qr_code.split(':');
+            var dataContainer = document.createElement('div');
+            dataContainer.className = 'qr-data';
+            
+            qrData.forEach(function(data) {
+                var dataDiv = document.createElement('div');
+                dataDiv.appendChild(document.createTextNode(data));
+                dataContainer.appendChild(dataDiv);
+            });
+
+            listItem.appendChild(dataContainer);
             list.appendChild(listItem);
         });
     </script>
