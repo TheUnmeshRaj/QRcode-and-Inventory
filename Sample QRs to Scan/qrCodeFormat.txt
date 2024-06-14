@@ -1,3 +1,5 @@
+Sample QR Codes:
+
 12344:Widget:Electronics:June 1, 2024:June 1, 2026:B123:1000:Factory 1:ISO9001:500:Order6789:CustomerXYZ:June 5, 2024
 
 12345:Gadget:Electronics:May 15, 2024:May 15, 2026:B124:800:Factory 2:ISO14001:700:Order6790:CustomerABC:June 6, 2024

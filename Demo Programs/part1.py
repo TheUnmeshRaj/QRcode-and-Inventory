@@ -1,37 +1,27 @@
-import threading
+# This python file scans the Qr code and rotates the servo motor
 
 import cv2
 import numpy as np
-import requests
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+import serial
+import time
 from pyzbar.pyzbar import decode
 
-app = Flask(__name__)
-socketio = SocketIO(app)
+# Initialize serial communication with Arduino
+arduino = serial.Serial('COM5', 9600, timeout=1)  # Ensure 'COM5' is the correct port
+time.sleep(2)  # Wait for the serial connection to initialize
 
-detected_qr_codes = []
-
-@app.route('/')
-def index():
-    return render_template('index.html', qr_codes=detected_qr_codes)
-
-@app.route('/submit_qr_code', methods=['POST'])
-def submit_qr_code():
-    data = request.form['data']
-    if data not in detected_qr_codes:
-        detected_qr_codes.append(data)
-        socketio.emit('new_qr_code', data)  
-    return 'OK', 200
-
-def send_qr_code_to_server(data):
-    url = 'http://localhost:5000/submit_qr_code'
-    response = requests.post(url, data={'data': data})
-    if response.status_code == 200:
-        print("Data sent to server successfully.")
+# Function to rotate the motor
+def rotate_motor(command):
+    if arduino:
+        try:
+            arduino.write(command.encode())  # Send command to Arduino
+            print(f"Motor rotation command '{command}' sent to Arduino")
+        except Exception as e:
+            print("Error sending command to Arduino:", e)
     else:
-        print("Failed to send data to server.")
+        print("Arduino not initialized. Motor control not possible.")
 
+# Function to scan QR codes
 def scan_qr_codes():
     cap = cv2.VideoCapture(0)
     
@@ -59,7 +49,11 @@ def scan_qr_codes():
             
             print(f"Data: {qr_data}")
             
-            send_qr_code_to_server(qr_data)
+            # Rotate motor to 180 degrees
+            rotate_motor('R')
+            time.sleep(5)  # Wait for 5 seconds
+            # Rotate motor back to 0 degrees
+            rotate_motor('O')
         
         for obj in decoded_objects:
             points = obj.polygon
@@ -80,7 +74,7 @@ def scan_qr_codes():
     
     cap.release()
     cv2.destroyAllWindows()
+    arduino.close()
 
 if __name__ == '__main__':
-    threading.Thread(target=scan_qr_codes).start()
-    socketio.run(app, debug=True)
+    scan_qr_codes()
