@@ -17,57 +17,53 @@
             text-align: center;
         }
 
-        #qr-codes-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        #qr-codes-list li {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .qr-data {
-            display: flex;
-            justify-content: space-between;
+        table {
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .qr-data div {
-            flex: 1;
-            padding: 0 10px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
             text-align: left;
         }
 
-        .qr-data div:first-child {
-            text-align: right;
-            padding-right: 20px;
-        }
-
-        .qr-data div:last-child {
-            text-align: left;
-            padding-left: 20px;
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
     <h1>Detected QR Codes:</h1>
-    <ul id="qr-codes-list">
-        {% for qr_code in qr_codes %}
-            <li>
-                <div class="qr-data">
+    <table>
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Date of Manufacture</th>
+                <th>Expiry Date</th>
+                <th>Batch Number</th>
+                <th>Batch Size</th>
+                <th>Source Location</th>
+                <th>Certification</th>
+                <th>Stock Level</th>
+                <th>Order ID</th>
+                <th>Customer ID</th>
+                <th>Date of Scan</th>
+            </tr>
+        </thead>
+        <tbody id="qr-codes-list">
+            {% for qr_code in qr_codes %}
+                <tr>
                     {% for data in qr_code.split(':') %}
-                        <div>{{ data }}</div>
+                        <td>{{ data }}</td>
                     {% endfor %}
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
@@ -77,19 +73,16 @@
         // Function to update QR codes list
         socket.on('new_qr_code', function(qr_code) {
             var list = document.getElementById('qr-codes-list');
-            var listItem = document.createElement('li');
+            var newRow = document.createElement('tr');
             var qrData = qr_code.split(':');
-            var dataContainer = document.createElement('div');
-            dataContainer.className = 'qr-data';
-            
+
             qrData.forEach(function(data) {
-                var dataDiv = document.createElement('div');
-                dataDiv.appendChild(document.createTextNode(data));
-                dataContainer.appendChild(dataDiv);
+                var newDataCell = document.createElement('td');
+                newDataCell.appendChild(document.createTextNode(data));
+                newRow.appendChild(newDataCell);
             });
 
-            listItem.appendChild(dataContainer);
-            list.appendChild(listItem);
+            list.appendChild(newRow);
         });
     </script>
 </body>

@@ -1,0 +1,9 @@
+12344:Widget:Electronics:June 1, 2024:June 1, 2026:B123:1000:Factory 1:ISO9001:500:Order6789:CustomerXYZ:June 5, 2024
+
+12345:Gadget:Electronics:May 15, 2024:May 15, 2026:B124:800:Factory 2:ISO14001:700:Order6790:CustomerABC:June 6, 2024
+
+12346:Appliance:Electronics:June 10, 2024:June 10, 2026:B125:1200:Factory 3:CE:1000:Order6791:CustomerDEF:June 7, 2024
+
+12347:Device:Electronics:April 20, 2024:April 20, 2026:B126:1500:Factory 4:FCC:1200:Order6792:CustomerGHI:June 8, 2024
+
+12348:Component:Electronics:June 5, 2024:June 5, 2026:B127:2000:Factory 5:RoHS:1800:Order6793:CustomerJKL:June 9, 2024
