@@ -1,89 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Scanner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a; /* Dark background */
+      color: #ffffff; /* Light text color */
+      margin: 0;
+      padding: 10px;
+    }
 
-        h1 {
-            color: #333;
-            text-align: center;
-        }
+    .container {
+      max-width: 100%;
+      width: 100%;
+      background-color: #2a2a2a; /* Darker container background */
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+    h1 {
+      color: #ffffff; /* White heading */
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #2a2a2a; /* Darker table background */
+    }
 
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    th, td {
+      border: 2px solid #444; /* Darker border color */
+      padding: 12px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 14px;
+      color: #ffffff; /* White text */
+    }
+
+    th {
+      background-color: #333; /* Darker header background */
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>Detected QR Codes:</h1>
-    <table>
+    <div class="table-container">
+      <table>
         <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Date of Manufacture</th>
-                <th>Expiry Date</th>
-                <th>Batch Number</th>
-                <th>Batch Size</th>
-                <th>Source Location</th>
-                <th>Certification</th>
-                <th>Stock Level</th>
-                <th>Order ID</th>
-                <th>Customer ID</th>
-                <th>Date of Scan</th>
-            </tr>
+          <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Date of Manufacture</th>
+            <th>Expiry Date</th>
+            <th>Batch Number</th>
+            <th>Batch Size</th>
+            <th>Source Location</th>
+            <th>Certification</th>
+            <th>Stock Level</th>
+            <th>Order ID</th>
+            <th>Customer ID</th>
+            <th>Date of Scan</th>
+          </tr>
         </thead>
         <tbody id="qr-codes-list">
-            {% for qr_code in qr_codes %}
-                <tr>
-                    {% for data in qr_code.split(':') %}
-                        <td>{{ data }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
+          {% for qr_code in qr_codes %}
+            <tr>
+              {% for data in qr_code.split(':') %}
+                <td>{{ data }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script>
-        // Connect to the WebSocket server
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script>
+    // Connect to the WebSocket server
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-        // Function to update QR codes list
-        socket.on('new_qr_code', function(qr_code) {
-            var list = document.getElementById('qr-codes-list');
-            var newRow = document.createElement('tr');
-            var qrData = qr_code.split(':');
+    // Function to update QR codes list
+    socket.on('new_qr_code', function(qr_code) {
+      var list = document.getElementById('qr-codes-list');
+      var newRow = document.createElement('tr');
+      var qrData = qr_code.split(':');
 
-            qrData.forEach(function(data) {
-                var newDataCell = document.createElement('td');
-                newDataCell.appendChild(document.createTextNode(data));
-                newRow.appendChild(newDataCell);
-            });
+      qrData.forEach(function(data) {
+        var newDataCell = document.createElement('td');
+        newDataCell.appendChild(document.createTextNode(data));
+        newRow.appendChild(newDataCell);
+      });
 
-            list.appendChild(newRow);
-        });
-    </script>
+      list.appendChild(newRow);
+    });
+  </script>
 </body>
 </html>
