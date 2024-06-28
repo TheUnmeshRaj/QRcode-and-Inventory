@@ -95,13 +95,48 @@
     /* Toggle button positioning */
     #dark-mode-toggle {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 27px;
+      right: 4px;
+    }
+
+    /* Navigation bar styles */
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    nav ul li {
+      float: left;
+    }
+
+    nav ul li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    nav ul li a.active {
+      background-color: #4CAF50;
+    }
+
+    nav ul li a:hover:not(.active) {
+      background-color: #111;
     }
   </style>
 </head>
 <body class="dark-mode">
   <div class="container">
+    <nav>
+      <ul>
+        <li><a href="/" class="active">Live Inventory Update</a></li>
+        <li><a href="/visualize">Visualize</a></li>
+      </ul>
+    </nav>
     <h1>Detected QR Codes:</h1>
     <div class="table-container">
       <table>

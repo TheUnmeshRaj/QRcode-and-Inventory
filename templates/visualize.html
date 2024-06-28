@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualize QR Code Data</title>
+  <style>
+    /* Common styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+      position: relative; /* Ensure body is relative for absolute positioning */
+    }
+
+    .container {
+      max-width: 100%;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
+
+    body.dark-mode .container {
+      background-color: #2a2a2a;
+    }
+
+    /* Light mode styles */
+    body.light-mode {
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    body.light-mode .container {
+      background-color: #fff;
+    }
+
+    /* Navigation bar styles */
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    nav ul li {
+      float: left;
+    }
+
+    nav ul li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    nav ul li a.active {
+      background-color: #4CAF50;
+    }
+
+    nav ul li a:hover:not(.active) {
+      background-color: #111;
+    }
+
+    /* Toggle button positioning */
+    #dark-mode-toggle {
+      position: absolute;
+      top: 27px;
+      right: 4px;
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <div class="container">
+    <nav>
+      <ul>
+        <li><a href="/" class="tab-link">Live Inventory Update</a></li>
+        <li><a href="/visualize" class="tab-link active">Visualize</a></li>
+      </ul>
+    </nav>
+    <h1>Visualize QR Code Data</h1>
+    <div id="visualization">
+      <!-- Placeholder for visualization content -->
+      <p>This is where your visualization content will appear.</p>
+    </div>
+  </div>
+
+  <!-- Dark mode toggle button -->
+  <button id="dark-mode-toggle">Switch to Light Mode</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script>
+    var darkModeToggle = document.getElementById('dark-mode-toggle');
+    var body = document.body;
+
+    darkModeToggle.addEventListener('click', function() {
+      // Toggle dark mode class on body
+      body.classList.toggle('dark-mode');
+      body.classList.toggle('light-mode');
+
+      // Update button text based on current mode
+      if (body.classList.contains('dark-mode')) {
+        darkModeToggle.textContent = 'Switch to Light Mode';
+      } else {
+        darkModeToggle.textContent = 'Switch to Dark Mode';
+      }
+    });
+  </script>
+</body>
+</html>
