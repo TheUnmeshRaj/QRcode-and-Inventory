@@ -65,3 +65,5 @@ def clear_session():
 if __name__ == '__main__':
     threading.Thread(target=scan_qr_codes).start()
     socketio.run(app, debug=True)
+    
+    

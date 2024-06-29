@@ -11,10 +11,9 @@
     <nav>
       <ul>
         <li><a href="#live-update" class="tab-link active" onclick="toggleTab(this)">Live Inventory Update</a></li>
-        <li><a href="#visualization" class="tab-link" onclick="toggleTab(this)">Visualize</a></li> <!-- Added back the Visualize tab -->
+        <li><a href="#visualization" class="tab-link" onclick="toggleTab(this)">Visualize</a></li>
       </ul>
     </nav>
-    
 
     <section id="live-update">
       <h1>Detected QR Codes:</h1>
@@ -31,10 +30,9 @@
               <th>Batch Size</th>
               <th>Source Location</th>
               <th>Certification</th>
-              <th>Stock Level</th>
               <th>Order ID</th>
-              <th>Customer ID</th>
               <th>Date of Scan</th>
+              <th>Time of Scan</th>
             </tr>
           </thead>
           <tbody id="qr-codes-list">
@@ -82,43 +80,63 @@
       }
     });
 
+    function formatDate(date) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString(undefined, options);
+    }
+    
+    function formatTime(date) {
+      return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    
+    
     // Function to update QR codes list
     function updateQRCodeList(qr_code) {
       var list = document.getElementById('qr-codes-list');
       var qrData = qr_code.split(':');
       var newRow = document.createElement('tr');
-
-      qrData.forEach(function(data) {
+    
+      qrData.forEach(function(data, index) {
         var newDataCell = document.createElement('td');
         newDataCell.textContent = data;
         newRow.appendChild(newDataCell);
       });
-
+    
+      // Add Date of Scan
+      var dateOfScanCell = document.createElement('td');
+      var dateOfScan = new Date();
+      dateOfScanCell.textContent = formatDate(dateOfScan);
+      newRow.appendChild(dateOfScanCell);
+    
+      // Add Time of Scan
+      var timeOfScanCell = document.createElement('td');
+      timeOfScanCell.textContent = formatTime(dateOfScan);
+      newRow.appendChild(timeOfScanCell);
+    
       list.appendChild(newRow); // Append new row to the table
     }
-
+    
     // Receive new QR code data from WebSocket
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
     });
 
     // Toggle active tab state and generate pie charts on switch to Visualize tab
-    // Toggle active tab state and generate pie charts on switch to Visualize tab
-function toggleTab(tab) {
-  var tabs = document.querySelectorAll('.tab-link');
-  tabs.forEach(function(t) {
-    t.classList.remove('active');
-  });
-  tab.classList.add('active');
+    function toggleTab(tab) {
+      var tabs = document.querySelectorAll('.tab-link');
+      tabs.forEach(function(t) {
+        t.classList.remove('active');
+      });
+      tab.classList.add('active');
 
-  if (tab.getAttribute('href') === '#visualization') {
-    generatePieCharts();
+      if (tab.getAttribute('href') === '#visualization') {
+        generatePieCharts();
 
-    // Scroll to the top of the visualization section
-    var visualizeSection = document.getElementById('visualization');
-    visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
+        // Scroll to the top of the visualization section
+        var visualizeSection = document.getElementById('visualization');
+        visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
 
     // Function to generate pie charts based on table data
     function generatePieCharts() {
