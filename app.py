@@ -1,22 +1,13 @@
-import os
 import threading
 
 import cv2
-import redis
 import requests
 from flask import Flask, redirect, render_template, request, session, url_for
+from flask_session import Session
 from flask_socketio import SocketIO, emit
 from pyzbar.pyzbar import decode
 
-from flask_session import Session
-
-secret_key = os.urandom(24)
-
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'samplelkey'
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
-Session(app)
 
 socketio = SocketIO(app)
 

@@ -11,9 +11,10 @@
     <nav>
       <ul>
         <li><a href="#live-update" class="tab-link active" onclick="toggleTab(this)">Live Inventory Update</a></li>
-        <li><a href="#visualization" class="tab-link" onclick="toggleTab(this)">Visualize</a></li>
+        <li><a href="#visualization" class="tab-link" onclick="toggleTab(this)">Visualize</a></li> <!-- Added back the Visualize tab -->
       </ul>
     </nav>
+    
 
     <section id="live-update">
       <h1>Detected QR Codes:</h1>
@@ -42,20 +43,27 @@
         </table>
       </div>
     </section>
-
-    <section id="visualization">
-      <!-- Placeholder for visualization content -->
-      <h1>Visualize QR Code Data</h1>
-      <div id="visualization-content">
-        <p>This is where your visualization content will appear.</p>
-      </div>
-    </section>
   </div>
+
+  <section id="visualization" class="container">
+    <h1>Visualize QR Code Data</h1>
+    <div class="chart-row">
+      <div class="chart-container">
+        <canvas id="pie-chart-source" width="400" height="400"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="pie-chart-category" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </section>
+  
 
   <!-- Dark mode toggle button -->
   <button id="dark-mode-toggle">Switch to Light Mode</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
     var darkModeToggle = document.getElementById('dark-mode-toggle');
     var body = document.body;
@@ -94,14 +102,114 @@
       updateQRCodeList(qr_code); // Update table with new QR code data
     });
 
-    // Toggle active tab state
-    function toggleTab(tab) {
-      var tabs = document.querySelectorAll('.tab-link');
-      tabs.forEach(function(t) {
-        t.classList.remove('active');
+    // Toggle active tab state and generate pie charts on switch to Visualize tab
+    // Toggle active tab state and generate pie charts on switch to Visualize tab
+function toggleTab(tab) {
+  var tabs = document.querySelectorAll('.tab-link');
+  tabs.forEach(function(t) {
+    t.classList.remove('active');
+  });
+  tab.classList.add('active');
+
+  if (tab.getAttribute('href') === '#visualization') {
+    generatePieCharts();
+
+    // Scroll to the top of the visualization section
+    var visualizeSection = document.getElementById('visualization');
+    visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+    // Function to generate pie charts based on table data
+    function generatePieCharts() {
+      var tableRows = document.querySelectorAll('#qr-codes-list tr');
+      var sourceData = {};
+      var categoryData = {};
+
+      // Extract data from table
+      tableRows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var source = cells[7].textContent.trim(); // Source Location (adjust index as per your table structure)
+        var category = cells[2].textContent.trim(); // Category (adjust index as per your table structure)
+
+        // Count occurrences of source locations
+        if (source in sourceData) {
+          sourceData[source]++;
+        } else {
+          sourceData[source] = 1;
+        }
+
+        // Count occurrences of categories
+        if (category in categoryData) {
+          categoryData[category]++;
+        } else {
+          categoryData[category] = 1;
+        }
       });
-      tab.classList.add('active');
+
+      // Prepare data for charts
+      var sourceLabels = Object.keys(sourceData);
+      var sourceValues = Object.values(sourceData);
+      var categoryLabels = Object.keys(categoryData);
+      var categoryValues = Object.values(categoryData);
+
+      // Create pie chart for Source Locations
+      var ctxSource = document.getElementById('pie-chart-source').getContext('2d');
+      if (window.mySourceChart) {
+        window.mySourceChart.destroy(); // Clear previous chart if exists
+      }
+      window.mySourceChart = new Chart(ctxSource, {
+        type: 'pie',
+        data: {
+          labels: sourceLabels,
+          datasets: [{
+            label: 'Source Locations',
+            data: sourceValues,
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'],
+          }]
+        },
+        options: {
+          responsive: false,
+          title: {
+            display: true,
+            text: 'Source Locations'
+          }
+        }
+      });
+
+      // Create pie chart for Categories
+      var ctxCategory = document.getElementById('pie-chart-category').getContext('2d');
+      if (window.myCategoryChart) {
+        window.myCategoryChart.destroy(); // Clear previous chart if exists
+      }
+      window.myCategoryChart = new Chart(ctxCategory, {
+        type: 'pie',
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            label: 'Categories',
+            data: categoryValues,
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'],
+          }]
+        },
+        options: {
+          responsive: false,
+          title: {
+            display: true,
+            text: 'Categories'
+          }
+        }
+      });
     }
+    
+    // Call generatePieCharts() on page load if on Visualize tab by default
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.querySelector('.tab-link.active').getAttribute('href') === '#visualization') {
+        generatePieCharts();
+      }
+    });
+
   </script>
+  
 </body>
 </html>

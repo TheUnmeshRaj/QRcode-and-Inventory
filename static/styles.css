@@ -1,18 +1,43 @@
-/* Common styles */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 10px;
-  position: relative; /* Ensure body is relative for absolute positioning */
+  position: relative;
 }
 
 .container {
   max-width: 100%;
-  width: 100%;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  margin-bottom: 20px; /* Add some bottom margin to create space */
 }
+#visualization {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  margin-top: 20px; /* Adjust margin as needed */
+}
+
+#visualization h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#visualization .chart-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px; /* Adjust spacing between charts */
+}
+
+#visualization .chart-container {
+  width: 45%; /* Adjust width as needed */
+  height: 400px; /* Adjust height as needed */
+  margin-right: 20px; /* Adjust margin between charts */
+}
+
+/* Add any additional styles as necessary */
 
 h1 {
   text-align: center;
@@ -22,9 +47,9 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 1px;
 }
-
+/*  */
 th, td {
   border: 2px solid #444;
   padding: 12px;
@@ -38,13 +63,11 @@ th {
   color: #ffffff;
   font-weight: bold;
 }
-
-/* Dark mode styles */
 body.dark-mode {
   background-color: #1a1a1a;
   color: #ffffff;
 }
-
+/* This is the container i am looking for */
 body.dark-mode .container {
   background-color: #2a2a2a;
 }
@@ -61,8 +84,7 @@ body.dark-mode th, body.dark-mode td {
 body.dark-mode th {
   background-color: #333;
 }
-
-/* Light mode styles */
+/*  */
 body.light-mode {
   background-color: #f4f4f4;
   color: #333;
@@ -85,7 +107,7 @@ body.light-mode th {
   background-color: #f2f2f2;
 }
 
-/* Navigation bar styles */
+/*  */
 nav ul {
   list-style-type: none;
   margin: 0;
@@ -114,10 +136,19 @@ nav ul li a:hover:not(.active) {
   background-color: #111;
 }
 
-/* Toggle button positioning */
+/*  */
 #dark-mode-toggle {
   position: absolute;
-  top: 27px;
-  right: 4px;
-  z-index: 100; /* Ensure toggle button is above other content */
+  top:33px;
+  right: 25px;
+  z-index: 100;
+}
+
+
+.chart-container {
+  width: 40%; /* Adjust width to use a percentage of the container */
+  height: 400px; /* Set a fixed height for consistency */
+  display: inline-block;
+  margin-right: 60px; /* Add margin between the charts */
+  vertical-align: top; /* Ensure alignment to the top */
 }
