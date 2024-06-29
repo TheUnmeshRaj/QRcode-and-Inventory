@@ -10,35 +10,46 @@
   <div class="container">
     <nav>
       <ul>
-        <li><a href="/" class="active">Live Inventory Update</a></li>
-        <li><a href="/visualize">Visualize</a></li>
+        <li><a href="#live-update" class="tab-link active" onclick="toggleTab(this)">Live Inventory Update</a></li>
+        <li><a href="#visualization" class="tab-link" onclick="toggleTab(this)">Visualize</a></li>
       </ul>
     </nav>
-    <h1>Detected QR Codes:</h1>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Product ID</th>
-            <th>Product Name</th>
-            <th>Category</th>
-            <th>Date of Manufacture</th>
-            <th>Expiry Date</th>
-            <th>Batch Number</th>
-            <th>Batch Size</th>
-            <th>Source Location</th>
-            <th>Certification</th>
-            <th>Stock Level</th>
-            <th>Order ID</th>
-            <th>Customer ID</th>
-            <th>Date of Scan</th>
-          </tr>
-        </thead>
-        <tbody id="qr-codes-list">
-          <!-- QR code data will be dynamically added here -->
-        </tbody>
-      </table>
-    </div>
+
+    <section id="live-update">
+      <h1>Detected QR Codes:</h1>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Date of Manufacture</th>
+              <th>Expiry Date</th>
+              <th>Batch Number</th>
+              <th>Batch Size</th>
+              <th>Source Location</th>
+              <th>Certification</th>
+              <th>Stock Level</th>
+              <th>Order ID</th>
+              <th>Customer ID</th>
+              <th>Date of Scan</th>
+            </tr>
+          </thead>
+          <tbody id="qr-codes-list">
+            <!-- QR code data will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="visualization">
+      <!-- Placeholder for visualization content -->
+      <h1>Visualize QR Code Data</h1>
+      <div id="visualization-content">
+        <p>This is where your visualization content will appear.</p>
+      </div>
+    </section>
   </div>
 
   <!-- Dark mode toggle button -->
@@ -82,6 +93,15 @@
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
     });
+
+    // Toggle active tab state
+    function toggleTab(tab) {
+      var tabs = document.querySelectorAll('.tab-link');
+      tabs.forEach(function(t) {
+        t.classList.remove('active');
+      });
+      tab.classList.add('active');
+    }
   </script>
 </body>
 </html>

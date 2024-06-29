@@ -1,11 +1,23 @@
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+import os
 import threading
-from pyzbar.pyzbar import decode
+
 import cv2
+import redis
 import requests
+from flask import Flask, redirect, render_template, request, session, url_for
+from flask_socketio import SocketIO, emit
+from pyzbar.pyzbar import decode
+
+from flask_session import Session
+
+secret_key = os.urandom(24)
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'samplelkey'
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
+Session(app)
+
 socketio = SocketIO(app)
 
 detected_qr_codes_set = set()
@@ -37,7 +49,14 @@ def scan_qr_codes():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    qr_data = session.get('qr_data', None)
+    return render_template('index.html', qr_data=qr_data)
+
+@app.route('/visualize')
+def visualize():
+    qr_data = session.get('qr_data', None)
+    return render_template('visualize.html', qr_data=qr_data)
+
 
 @app.route('/submit_qr_code', methods=['POST'])
 def submit_qr_code():
@@ -47,9 +66,10 @@ def submit_qr_code():
         socketio.emit('new_qr_code', data)
     return 'OK', 200
 
-@app.route('/visualize')
-def visualize():
-    return render_template('visualize.html')
+@app.route('/clear_session')
+def clear_session():
+    session.pop('qr_data', None)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     threading.Thread(target=scan_qr_codes).start()
