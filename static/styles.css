@@ -37,7 +37,6 @@ body {
   margin-right: 20px; /* Adjust margin between charts */
 }
 
-/* Add any additional styles as necessary */
 
 h1 {
   text-align: center;
@@ -150,5 +149,10 @@ nav ul li a:hover:not(.active) {
   height: 400px; /* Set a fixed height for consistency */
   display: inline-block;
   margin-right: 60px; /* Add margin between the charts */
+  margin-left: 180px; /* Add margin between the charts */
   vertical-align: top; /* Ensure alignment to the top */
+}
+
+.expired-row {
+  background-color: #c73131; /* Light red background for expired rows */
 }

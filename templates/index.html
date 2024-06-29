@@ -89,33 +89,37 @@
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     
-    
     // Function to update QR codes list
-    function updateQRCodeList(qr_code) {
-      var list = document.getElementById('qr-codes-list');
-      var qrData = qr_code.split(':');
-      var newRow = document.createElement('tr');
-    
-      qrData.forEach(function(data, index) {
-        var newDataCell = document.createElement('td');
-        newDataCell.textContent = data;
-        newRow.appendChild(newDataCell);
-      });
-    
-      // Add Date of Scan
-      var dateOfScanCell = document.createElement('td');
-      var dateOfScan = new Date();
-      dateOfScanCell.textContent = formatDate(dateOfScan);
-      newRow.appendChild(dateOfScanCell);
-    
-      // Add Time of Scan
-      var timeOfScanCell = document.createElement('td');
-      timeOfScanCell.textContent = formatTime(dateOfScan);
-      newRow.appendChild(timeOfScanCell);
-    
-      list.appendChild(newRow); // Append new row to the table
-    }
-    
+function updateQRCodeList(qr_code) {
+  var list = document.getElementById('qr-codes-list');
+  var qrData = qr_code.split(':');
+  var newRow = document.createElement('tr');
+
+  qrData.forEach(function(data, index) {
+    var newDataCell = document.createElement('td');
+    newDataCell.textContent = data;
+    newRow.appendChild(newDataCell);
+  });
+
+  // Add Date of Scan
+  var dateOfScanCell = document.createElement('td');
+  var dateOfScan = new Date();
+  dateOfScanCell.textContent = formatDate(dateOfScan);
+  newRow.appendChild(dateOfScanCell);
+
+  // Add Time of Scan
+  var timeOfScanCell = document.createElement('td');
+  timeOfScanCell.textContent = formatTime(dateOfScan);
+  newRow.appendChild(timeOfScanCell);
+
+  // Check expiry date against scan date and apply class if expired
+  var expiryDate = new Date(qrData[4]); // Assuming expiry date is at index 4
+  if (expiryDate < dateOfScan) {
+    newRow.classList.add('expired-row');
+  }
+
+  list.appendChild(newRow); // Append new row to the table
+}
     // Receive new QR code data from WebSocket
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
