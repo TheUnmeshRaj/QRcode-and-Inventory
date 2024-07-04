@@ -53,6 +53,9 @@
         <canvas id="pie-chart-category" width="400" height="400"></canvas>
       </div>
     </div>
+    <div id="chart-descriptions">
+      <!-- Placeholder for text below the pie charts -->
+    </div>
   </section>
   
 
@@ -90,36 +93,35 @@
     }
     
     // Function to update QR codes list
-function updateQRCodeList(qr_code) {
-  var list = document.getElementById('qr-codes-list');
-  var qrData = qr_code.split(':');
-  var newRow = document.createElement('tr');
+    function updateQRCodeList(qr_code) {
+      var list = document.getElementById('qr-codes-list');
+      var qrData = qr_code.split(':');
+      var newRow = document.createElement('tr');
 
-  qrData.forEach(function(data, index) {
-    var newDataCell = document.createElement('td');
-    newDataCell.textContent = data;
-    newRow.appendChild(newDataCell);
-  });
+      qrData.forEach(function(data, index) {
+        var newDataCell = document.createElement('td');
+        newDataCell.textContent = data;
+        newRow.appendChild(newDataCell);
+      });
 
-  // Add Date of Scan
-  var dateOfScanCell = document.createElement('td');
-  var dateOfScan = new Date();
-  dateOfScanCell.textContent = formatDate(dateOfScan);
-  newRow.appendChild(dateOfScanCell);
+      var dateOfScanCell = document.createElement('td');
+      var dateOfScan = new Date();
+      dateOfScanCell.textContent = formatDate(dateOfScan);
+      newRow.appendChild(dateOfScanCell);
 
-  // Add Time of Scan
-  var timeOfScanCell = document.createElement('td');
-  timeOfScanCell.textContent = formatTime(dateOfScan);
-  newRow.appendChild(timeOfScanCell);
+      var timeOfScanCell = document.createElement('td');
+      timeOfScanCell.textContent = formatTime(dateOfScan);
+      newRow.appendChild(timeOfScanCell);
 
-  // Check expiry date against scan date and apply class if expired
-  var expiryDate = new Date(qrData[4]); // Assuming expiry date is at index 4
-  if (expiryDate < dateOfScan) {
-    newRow.classList.add('expired-row');
-  }
+      // Check expiry date against scan date and apply class if expired
+      var expiryDate = new Date(qrData[4]); 
+      if (expiryDate < dateOfScan) {
+        newRow.classList.add('expired-row');
+      }
 
-  list.appendChild(newRow); // Append new row to the table
-}
+      list.appendChild(newRow); // Append new row to the table
+    }
+
     // Receive new QR code data from WebSocket
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
@@ -142,25 +144,24 @@ function updateQRCodeList(qr_code) {
       }
     }
 
-    // Function to generate pie charts based on table data
     function generatePieCharts() {
       var tableRows = document.querySelectorAll('#qr-codes-list tr');
       var sourceData = {};
       var categoryData = {};
-
+    
       // Extract data from table
       tableRows.forEach(function(row) {
         var cells = row.querySelectorAll('td');
-        var source = cells[7].textContent.trim(); // Source Location (adjust index as per your table structure)
-        var category = cells[2].textContent.trim(); // Category (adjust index as per your table structure)
-
+        var source = cells[7].textContent.trim(); // Source Location
+        var category = cells[2].textContent.trim(); // Category
+    
         // Count occurrences of source locations
         if (source in sourceData) {
           sourceData[source]++;
         } else {
           sourceData[source] = 1;
         }
-
+    
         // Count occurrences of categories
         if (category in categoryData) {
           categoryData[category]++;
@@ -168,37 +169,66 @@ function updateQRCodeList(qr_code) {
           categoryData[category] = 1;
         }
       });
-
+    
       // Prepare data for charts
       var sourceLabels = Object.keys(sourceData);
       var sourceValues = Object.values(sourceData);
       var categoryLabels = Object.keys(categoryData);
       var categoryValues = Object.values(categoryData);
-
-      // Create pie chart for Source Locations
+    
+      // Define font color based on the current mode
+      var fontColor = document.body.classList.contains('dark-mode') ? '#ffffff' : '#333333';
+    
+      // Global Chart.js default settings
+      Chart.defaults.color = fontColor;
+    
+      // Create bar chart for Source Locations
       var ctxSource = document.getElementById('pie-chart-source').getContext('2d');
       if (window.mySourceChart) {
         window.mySourceChart.destroy(); // Clear previous chart if exists
       }
       window.mySourceChart = new Chart(ctxSource, {
-        type: 'pie',
+        type: 'bar',
         data: {
           labels: sourceLabels,
           datasets: [{
             label: 'Source Locations',
             data: sourceValues,
             backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'],
+            borderColor: "#4bc0c0",
+            borderWidth: 1
           }]
         },
         options: {
           responsive: false,
-          title: {
-            display: true,
-            text: 'Source Locations'
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: fontColor
+              }
+            },
+            x: {
+              ticks: {
+                color: fontColor
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: fontColor
+              }
+            },
+            title: {
+              display: true,
+              text: 'Source Locations (Bar Chart)',
+              color: fontColor
+            }
           }
         }
       });
-
+    
       // Create pie chart for Categories
       var ctxCategory = document.getElementById('pie-chart-category').getContext('2d');
       if (window.myCategoryChart) {
@@ -216,14 +246,32 @@ function updateQRCodeList(qr_code) {
         },
         options: {
           responsive: false,
-          title: {
-            display: true,
-            text: 'Categories'
+          plugins: {
+            legend: {
+              labels: {
+                color: fontColor
+              }
+            },
+            title: {
+              display: true,
+              text: 'Categories',
+              color: fontColor
+            }
           }
         }
       });
-    }
     
+      // Update chart descriptions or add new text below the charts
+      var chartDescriptions = document.getElementById('chart-descriptions');
+      if (chartDescriptions) {
+        chartDescriptions.innerHTML = `
+          <div style="display: flex; justify-content: space-between; margin-left: 312px; font-weight: bold;">
+            <span>Source Location</span>
+            <span style="margin-right: 530px;">Category</span>
+          </div>`;
+      }
+    }
+    // Function to generate pie charts based on table data
     // Call generatePieCharts() on page load if on Visualize tab by default
     document.addEventListener('DOMContentLoaded', function() {
       if (document.querySelector('.tab-link.active').getAttribute('href') === '#visualization') {

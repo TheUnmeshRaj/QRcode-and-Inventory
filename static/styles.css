@@ -10,14 +10,14 @@ body {
   border-radius: 8px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
-  margin-bottom: 20px; /* Add some bottom margin to create space */
+  margin-bottom: 20px;
 }
 #visualization {
   max-width: 100%;
   border-radius: 8px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
-  margin-top: 20px; /* Adjust margin as needed */
+  margin-top: 20px;
 }
 
 #visualization h1 {
@@ -28,13 +28,13 @@ body {
 #visualization .chart-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px; /* Adjust spacing between charts */
+  margin-top: 20px; 
 }
 
 #visualization .chart-container {
-  width: 45%; /* Adjust width as needed */
-  height: 400px; /* Adjust height as needed */
-  margin-right: 20px; /* Adjust margin between charts */
+  width: 45%;
+  height: 400px; 
+  margin-right: 20px; 
 }
 
 
@@ -145,14 +145,14 @@ nav ul li a:hover:not(.active) {
 
 
 .chart-container {
-  width: 40%; /* Adjust width to use a percentage of the container */
-  height: 400px; /* Set a fixed height for consistency */
+  width: 40%;
+  height: 400px;
   display: inline-block;
-  margin-right: 60px; /* Add margin between the charts */
-  margin-left: 180px; /* Add margin between the charts */
-  vertical-align: top; /* Ensure alignment to the top */
+  margin-right: 60px; 
+  margin-left: 180px; 
+  vertical-align: top;
 }
 
 .expired-row {
-  background-color: #c73131; /* Light red background for expired rows */
+  background-color: #c73131;
 }
