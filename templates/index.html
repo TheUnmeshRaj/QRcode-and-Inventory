@@ -16,6 +16,7 @@
     </nav>
 
     <section id="live-update">
+      <h1 align="center"> <img src="https://readme-typing-svg.herokuapp.com/?font=Righteous&size=35&center=true&vCenter=true&width=500&height=70&duration=7000&lines=Hi+There!+👋;+We+are+Production+Patrollers!;" /> </h1>
       <h1>Detected QR Codes:</h1>
       <div class="table-container">
         <table>
@@ -40,6 +41,9 @@
           </tbody>
         </table>
       </div>
+      <div>
+        Expired Items: <span id="expired-item-count">0</span>
+      </div>
     </section>
   </div>
 
@@ -57,9 +61,7 @@
       <!-- Placeholder for text below the pie charts -->
     </div>
   </section>
-  
 
-  <!-- Dark mode toggle button -->
   <button id="dark-mode-toggle">Switch to Light Mode</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -71,11 +73,9 @@
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     darkModeToggle.addEventListener('click', function() {
-      // Toggle dark mode class on body
       body.classList.toggle('dark-mode');
       body.classList.toggle('light-mode');
 
-      // Update button text based on current mode
       if (body.classList.contains('dark-mode')) {
         darkModeToggle.textContent = 'Switch to Light Mode';
       } else {
@@ -92,42 +92,50 @@
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     
-    // Function to update QR codes list
-    function updateQRCodeList(qr_code) {
-      var list = document.getElementById('qr-codes-list');
-      var qrData = qr_code.split(':');
-      var newRow = document.createElement('tr');
+    var expiredItemCount = 0; // Counter for expired items
 
-      qrData.forEach(function(data, index) {
-        var newDataCell = document.createElement('td');
-        newDataCell.textContent = data;
-        newRow.appendChild(newDataCell);
-      });
+function updateQRCodeList(qr_code) {
+  var list = document.getElementById('qr-codes-list');
+  var qrData = qr_code.split(':');
+  var newRow = document.createElement('tr');
 
-      var dateOfScanCell = document.createElement('td');
-      var dateOfScan = new Date();
-      dateOfScanCell.textContent = formatDate(dateOfScan);
-      newRow.appendChild(dateOfScanCell);
+  qrData.forEach(function(data, index) {
+    var newDataCell = document.createElement('td');
+    newDataCell.textContent = data;
+    newRow.appendChild(newDataCell);
+  });
 
-      var timeOfScanCell = document.createElement('td');
-      timeOfScanCell.textContent = formatTime(dateOfScan);
-      newRow.appendChild(timeOfScanCell);
+  var dateOfScanCell = document.createElement('td');
+  var dateOfScan = new Date();
+  dateOfScanCell.textContent = formatDate(dateOfScan);
+  newRow.appendChild(dateOfScanCell);
 
-      // Check expiry date against scan date and apply class if expired
-      var expiryDate = new Date(qrData[4]); 
-      if (expiryDate < dateOfScan) {
-        newRow.classList.add('expired-row');
-      }
+  var timeOfScanCell = document.createElement('td');
+  timeOfScanCell.textContent = formatTime(dateOfScan);
+  newRow.appendChild(timeOfScanCell);
 
-      list.appendChild(newRow); // Append new row to the table
-    }
+  var expiryDate = new Date(qrData[4]); 
+  if (expiryDate < dateOfScan) {
+    newRow.classList.add('expired-row');
+    expiredItemCount++; // Increment expired item counter
+    updateExpiredItemCount(); // Update the display of expired item count
+  }
 
-    // Receive new QR code data from WebSocket
+  list.appendChild(newRow); // Append new row to the table
+}
+
+function updateExpiredItemCount() {
+  var expiredCountElement = document.getElementById('expired-item-count');
+  if (expiredCountElement) {
+    expiredCountElement.textContent = expiredItemCount.toString();
+  }
+}
+
+
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
     });
 
-    // Toggle active tab state and generate pie charts on switch to Visualize tab
     function toggleTab(tab) {
       var tabs = document.querySelectorAll('.tab-link');
       tabs.forEach(function(t) {
@@ -149,20 +157,17 @@
       var sourceData = {};
       var categoryData = {};
     
-      // Extract data from table
       tableRows.forEach(function(row) {
         var cells = row.querySelectorAll('td');
         var source = cells[7].textContent.trim(); // Source Location
         var category = cells[2].textContent.trim(); // Category
     
-        // Count occurrences of source locations
         if (source in sourceData) {
           sourceData[source]++;
         } else {
           sourceData[source] = 1;
         }
     
-        // Count occurrences of categories
         if (category in categoryData) {
           categoryData[category]++;
         } else {
@@ -170,19 +175,15 @@
         }
       });
     
-      // Prepare data for charts
       var sourceLabels = Object.keys(sourceData);
       var sourceValues = Object.values(sourceData);
       var categoryLabels = Object.keys(categoryData);
       var categoryValues = Object.values(categoryData);
     
-      // Define font color based on the current mode
       var fontColor = document.body.classList.contains('dark-mode') ? '#ffffff' : '#333333';
     
-      // Global Chart.js default settings
       Chart.defaults.color = fontColor;
     
-      // Create bar chart for Source Locations
       var ctxSource = document.getElementById('pie-chart-source').getContext('2d');
       if (window.mySourceChart) {
         window.mySourceChart.destroy(); // Clear previous chart if exists
@@ -229,7 +230,6 @@
         }
       });
     
-      // Create pie chart for Categories
       var ctxCategory = document.getElementById('pie-chart-category').getContext('2d');
       if (window.myCategoryChart) {
         window.myCategoryChart.destroy(); // Clear previous chart if exists
@@ -260,19 +260,15 @@
           }
         }
       });
-    
-      // Update chart descriptions or add new text below the charts
       var chartDescriptions = document.getElementById('chart-descriptions');
       if (chartDescriptions) {
         chartDescriptions.innerHTML = `
           <div style="display: flex; justify-content: space-between; margin-left: 312px; font-weight: bold;">
             <span>Source Location</span>
-            <span style="margin-right: 530px;">Category</span>
+            <span style="margin-right: 370px;">Category</span>
           </div>`;
       }
     }
-    // Function to generate pie charts based on table data
-    // Call generatePieCharts() on page load if on Visualize tab by default
     document.addEventListener('DOMContentLoaded', function() {
       if (document.querySelector('.tab-link.active').getAttribute('href') === '#visualization') {
         generatePieCharts();
