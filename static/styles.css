@@ -25,13 +25,13 @@ body {
   margin-bottom: 20px;
 }
 
-#visualization .chart-row {
+.chart-row {
   display: flex;
   justify-content: space-between;
   margin-top: 20px; 
 }
 
-#visualization .chart-container {
+.chart-container {
   width: 45%;
   height: 400px; 
 }
@@ -157,27 +157,6 @@ nav ul li a:hover:not(.active) {
 .chart-descriptions span {
   text-align: center;
   width: 50%;
-}
-
-.chart-row {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-.chart-container {
-  flex: 1;
-  padding: 20px;
-}
-
-/* Dark mode styles */
-body.dark-mode .chart-legend {
-  color: #ffffff;
-}
-
-/* Light mode styles */
-body.light-mode .chart-legend {
-  color: #333333;
 }
 
 .table-container th, 

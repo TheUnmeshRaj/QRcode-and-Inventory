@@ -41,7 +41,9 @@
           </tbody>
         </table>
       </div>
-      <div style="margin-top: 10px; margin-left: 10px;"> Expired Items: <span id="expired-item-count">0</span> </div> 
+      <div>
+        Expired Items: <span id="expired-item-count">0</span>
+      </div>
     </section>
   </div>
 
@@ -70,12 +72,11 @@
       <!-- Placeholder for text below the pie charts -->
     </div>
   </section>
-  
+
   <button id="dark-mode-toggle">Switch to Light Mode</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
     var darkModeToggle = document.getElementById('dark-mode-toggle');
     var body = document.body;
@@ -152,12 +153,12 @@
       tab.classList.add('active');
 
       if (tab.getAttribute('href') === '#visualization') {
-        // Scroll to the top of the visualization section before generating charts
-        var visualizeSection = document.getElementById('visualization');
-        visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
         generatePieCharts();
         generateAdditionalCharts();
+
+        // Scroll to the top of the visualization section
+        var visualizeSection = document.getElementById('visualization');
+        visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 
@@ -250,7 +251,7 @@
           datasets: [{
             label: 'Categories',
             data: categoryValues,
-            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'],
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff']
           }]
         },
         options: {
@@ -263,125 +264,129 @@
             },
             title: {
               display: true,
-              text: 'Categories',
+              text: 'Categories (Pie Chart)',
               color: fontColor
             }
           }
         }
       });
-      
     }
-
-    function generateBatchSizeChart() {
-      var tableRows = document.querySelectorAll('#qr-codes-list tr');
-      var batchSizeData = {};
-  
-      tableRows.forEach(function(row) {
-          var cells = row.querySelectorAll('td');
-          var batchSize = cells[6].textContent.trim();
-  
-          if (batchSize in batchSizeData) {
-              batchSizeData[batchSize]++;
-          } else {
-              batchSizeData[batchSize] = 1;
-          }
-      });
-  
-      var batchSizeLabels = Object.keys(batchSizeData);
-      var batchSizeValues = Object.values(batchSizeData);
-  
-      var ctxBatchSize = document.getElementById('batch-size-chart').getContext('2d');
-      new Chart(ctxBatchSize, {
-          type: 'bar',
-          data: {
-              labels: batchSizeLabels,
-              datasets: [{
-                  label: 'Batch Size Distribution',
-                  data: batchSizeValues,
-                  backgroundColor: '#36a2eb',
-                  borderColor: "#36a2eb",
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              responsive: true,
-              scales: {
-                  y: {
-                      beginAtZero: true
-                  }
-              },
-              plugins: {
-                  legend: {
-                      display: false
-                  },
-                  title: {
-                      display: true,
-                      text: 'Batch Size Distribution'
-                  }
-              }
-          }
-      });
-    }
-  
-    function generateExpiryDateChart() {
-      var tableRows = document.querySelectorAll('#qr-codes-list tr');
-      var expiryDates = [];
-
-      tableRows.forEach(function(row) {
-          var cells = row.querySelectorAll('td');
-          var expiryDate = cells[4].textContent.trim();
-          expiryDates.push(new Date(expiryDate));
-      });
-
-      expiryDates.sort((a, b) => a - b);
-      
-      var ctxExpiryDate = document.getElementById('expiry-date-chart').getContext('2d');
-      new Chart(ctxExpiryDate, {
-          type: 'line',
-          data: {
-              labels: expiryDates.map(date => date.toDateString()),
-              datasets: [{
-                  label: 'Expiry Date Distribution',
-                  data: expiryDates.map(date => date.getTime()),
-                  backgroundColor: '#ff6384',
-                  borderColor: "#ff6384",
-                  fill: false
-              }]
-          },
-          options: {
-              responsive: true,
-              scales: {
-                  x: {
-                      type: 'time',
-                      time: {
-                          unit: 'day'
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      display: false
-                  },
-                  title: {
-                      display: true,
-                      text: 'Expiry Date Distribution'
-                  }
-              }
-          }
-      });
-    }
-
+    
     function generateAdditionalCharts() {
-      generateBatchSizeChart();
-      generateExpiryDateChart();
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      if (document.querySelector('.tab-link.active').getAttribute('href') === '#visualization') {
-          generatePieCharts();
-          generateAdditionalCharts();
+      var tableRows = document.querySelectorAll('#qr-codes-list tr');
+      var batchSizeData = [];
+      var expiryDateData = [];
+    
+      tableRows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var batchSize = parseInt(cells[6].textContent.trim(), 10); // Batch Size
+        var expiryDate = cells[4].textContent.trim(); // Expiry Date
+    
+        if (!isNaN(batchSize)) {
+          batchSizeData.push(batchSize);
+        }
+    
+        if (expiryDate) {
+          expiryDateData.push(expiryDate);
+        }
+      });
+    
+      var fontColor = document.body.classList.contains('dark-mode') ? '#ffffff' : '#333333';
+    
+      Chart.defaults.color = fontColor;
+    
+      var ctxBatchSize = document.getElementById('batch-size-chart').getContext('2d');
+      if (window.myBatchSizeChart) {
+        window.myBatchSizeChart.destroy(); // Clear previous chart if exists
       }
-    });
+      window.myBatchSizeChart = new Chart(ctxBatchSize, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: batchSizeData.length}, (_, i) => i + 1),
+          datasets: [{
+            label: 'Batch Size',
+            data: batchSizeData,
+            borderColor: "#4bc0c0",
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: fontColor
+              }
+            },
+            x: {
+              ticks: {
+                color: fontColor
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: fontColor
+              }
+            },
+            title: {
+              display: true,
+              text: 'Batch Size Over Time',
+              color: fontColor
+            }
+          }
+        }
+      });
+    
+      var ctxExpiryDate = document.getElementById('expiry-date-chart').getContext('2d');
+      if (window.myExpiryDateChart) {
+        window.myExpiryDateChart.destroy(); // Clear previous chart if exists
+      }
+      window.myExpiryDateChart = new Chart(ctxExpiryDate, {
+        type: 'bar',
+        data: {
+          labels: expiryDateData,
+          datasets: [{
+            label: 'Expiry Dates',
+            data: Array(expiryDateData.length).fill(1),
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'],
+            borderColor: "#4bc0c0",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: fontColor
+              }
+            },
+            x: {
+              ticks: {
+                color: fontColor
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: fontColor
+              }
+            },
+            title: {
+              display: true,
+              text: 'Expiry Dates (Bar Chart)',
+              color: fontColor
+            }
+          }
+        }
+      });
+    }
   </script>
 </body>
 </html>
