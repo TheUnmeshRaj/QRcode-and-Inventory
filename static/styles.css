@@ -14,7 +14,6 @@ body {
 }
 
 #visualization {
-  max-width: 100%;
   border-radius: 8px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
@@ -35,7 +34,6 @@ body {
 #visualization .chart-container {
   width: 45%;
   height: 400px; 
-  margin-right: 20px; 
 }
 
 h1 {
@@ -68,10 +66,7 @@ body.dark-mode {
   color: #ffffff;
 }
 
-body.dark-mode .container {
-  background-color: #2a2a2a;
-}
-
+body.dark-mode .container,
 body.dark-mode table {
   background-color: #2a2a2a;
 }
@@ -91,10 +86,7 @@ body.light-mode {
   color: #333;
 }
 
-body.light-mode .container {
-  background-color: #ffffff;
-}
-
+body.light-mode .container,
 body.light-mode table {
   background-color: #ffffff;
 }
@@ -144,15 +136,6 @@ nav ul li a:hover:not(.active) {
   z-index: 100;
 }
 
-.chart-container {
-  width: 40%;
-  height: 400px;
-  display: inline-block;
-  margin-right: 60px; 
-  margin-left: 180px; 
-  vertical-align: top;
-}
-
 .expired-row {
   background-color: #c73131;
 }
@@ -162,6 +145,29 @@ nav ul li a:hover:not(.active) {
   text-align: center;
   font-weight: bold;
   margin-top: 10px;
+}
+
+.chart-descriptions {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.chart-descriptions span {
+  text-align: center;
+  width: 50%;
+}
+
+.chart-row {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.chart-container {
+  flex: 1;
+  padding: 20px;
 }
 
 /* Dark mode styles */
@@ -174,7 +180,6 @@ body.light-mode .chart-legend {
   color: #333333;
 }
 
-/* Styles for the table to ensure consistency */
 .table-container th, 
 .table-container td {
   color: #333333; /* Default light mode color */
@@ -183,16 +188,4 @@ body.light-mode .chart-legend {
 body.dark-mode .table-container th,
 body.dark-mode .table-container td {
   color: #ffffff; /* Dark mode color */
-}
-
-.chart-descriptions {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  margin-top: 20px; /* Adjust margin as needed */
-}
-
-.chart-descriptions span {
-  text-align: center;
-  width: 50%;
 }

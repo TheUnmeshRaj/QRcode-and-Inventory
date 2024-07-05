@@ -41,14 +41,13 @@
           </tbody>
         </table>
       </div>
-      <div>
-        Expired Items: <span id="expired-item-count">0</span>
-      </div>
+      <div style="margin-top: 10px; margin-left: 10px;"> Expired Items: <span id="expired-item-count">0</span> </div> 
     </section>
   </div>
 
   <section id="visualization" class="container">
     <h1>Visualize QR Code Data</h1>
+    
     <div class="chart-row">
       <div class="chart-container">
         <canvas id="pie-chart-source" width="400" height="400"></canvas>
@@ -57,11 +56,21 @@
         <canvas id="pie-chart-category" width="400" height="400"></canvas>
       </div>
     </div>
+    
+    <div class="chart-row">
+      <div class="chart-container">
+        <canvas id="batch-size-chart" width="400" height="400"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="expiry-date-chart" width="400" height="400"></canvas>
+      </div>
+    </div>
+    
     <div id="chart-descriptions">
       <!-- Placeholder for text below the pie charts -->
     </div>
   </section>
-
+  
   <button id="dark-mode-toggle">Switch to Light Mode</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -94,43 +103,42 @@
     
     var expiredItemCount = 0; // Counter for expired items
 
-function updateQRCodeList(qr_code) {
-  var list = document.getElementById('qr-codes-list');
-  var qrData = qr_code.split(':');
-  var newRow = document.createElement('tr');
+    function updateQRCodeList(qr_code) {
+      var list = document.getElementById('qr-codes-list');
+      var qrData = qr_code.split(':');
+      var newRow = document.createElement('tr');
 
-  qrData.forEach(function(data, index) {
-    var newDataCell = document.createElement('td');
-    newDataCell.textContent = data;
-    newRow.appendChild(newDataCell);
-  });
+      qrData.forEach(function(data, index) {
+        var newDataCell = document.createElement('td');
+        newDataCell.textContent = data;
+        newRow.appendChild(newDataCell);
+      });
 
-  var dateOfScanCell = document.createElement('td');
-  var dateOfScan = new Date();
-  dateOfScanCell.textContent = formatDate(dateOfScan);
-  newRow.appendChild(dateOfScanCell);
+      var dateOfScanCell = document.createElement('td');
+      var dateOfScan = new Date();
+      dateOfScanCell.textContent = formatDate(dateOfScan);
+      newRow.appendChild(dateOfScanCell);
 
-  var timeOfScanCell = document.createElement('td');
-  timeOfScanCell.textContent = formatTime(dateOfScan);
-  newRow.appendChild(timeOfScanCell);
+      var timeOfScanCell = document.createElement('td');
+      timeOfScanCell.textContent = formatTime(dateOfScan);
+      newRow.appendChild(timeOfScanCell);
 
-  var expiryDate = new Date(qrData[4]); 
-  if (expiryDate < dateOfScan) {
-    newRow.classList.add('expired-row');
-    expiredItemCount++; // Increment expired item counter
-    updateExpiredItemCount(); // Update the display of expired item count
-  }
+      var expiryDate = new Date(qrData[4]); 
+      if (expiryDate < dateOfScan) {
+        newRow.classList.add('expired-row');
+        expiredItemCount++; // Increment expired item counter
+        updateExpiredItemCount(); // Update the display of expired item count
+      }
 
-  list.appendChild(newRow); // Append new row to the table
-}
+      list.appendChild(newRow); // Append new row to the table
+    }
 
-function updateExpiredItemCount() {
-  var expiredCountElement = document.getElementById('expired-item-count');
-  if (expiredCountElement) {
-    expiredCountElement.textContent = expiredItemCount.toString();
-  }
-}
-
+    function updateExpiredItemCount() {
+      var expiredCountElement = document.getElementById('expired-item-count');
+      if (expiredCountElement) {
+        expiredCountElement.textContent = expiredItemCount.toString();
+      }
+    }
 
     socket.on('new_qr_code', function(qr_code) {
       updateQRCodeList(qr_code); // Update table with new QR code data
@@ -144,11 +152,12 @@ function updateExpiredItemCount() {
       tab.classList.add('active');
 
       if (tab.getAttribute('href') === '#visualization') {
-        generatePieCharts();
-
-        // Scroll to the top of the visualization section
+        // Scroll to the top of the visualization section before generating charts
         var visualizeSection = document.getElementById('visualization');
         visualizeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        generatePieCharts();
+        generateAdditionalCharts();
       }
     }
 
@@ -260,22 +269,119 @@ function updateExpiredItemCount() {
           }
         }
       });
-      var chartDescriptions = document.getElementById('chart-descriptions');
-      if (chartDescriptions) {
-        chartDescriptions.innerHTML = `
-          <div style="display: flex; justify-content: space-between; margin-left: 312px; font-weight: bold;">
-            <span>Source Location</span>
-            <span style="margin-right: 370px;">Category</span>
-          </div>`;
-      }
+      
     }
+
+    function generateBatchSizeChart() {
+      var tableRows = document.querySelectorAll('#qr-codes-list tr');
+      var batchSizeData = {};
+  
+      tableRows.forEach(function(row) {
+          var cells = row.querySelectorAll('td');
+          var batchSize = cells[6].textContent.trim();
+  
+          if (batchSize in batchSizeData) {
+              batchSizeData[batchSize]++;
+          } else {
+              batchSizeData[batchSize] = 1;
+          }
+      });
+  
+      var batchSizeLabels = Object.keys(batchSizeData);
+      var batchSizeValues = Object.values(batchSizeData);
+  
+      var ctxBatchSize = document.getElementById('batch-size-chart').getContext('2d');
+      new Chart(ctxBatchSize, {
+          type: 'bar',
+          data: {
+              labels: batchSizeLabels,
+              datasets: [{
+                  label: 'Batch Size Distribution',
+                  data: batchSizeValues,
+                  backgroundColor: '#36a2eb',
+                  borderColor: "#36a2eb",
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              },
+              plugins: {
+                  legend: {
+                      display: false
+                  },
+                  title: {
+                      display: true,
+                      text: 'Batch Size Distribution'
+                  }
+              }
+          }
+      });
+    }
+  
+    function generateExpiryDateChart() {
+      var tableRows = document.querySelectorAll('#qr-codes-list tr');
+      var expiryDates = [];
+
+      tableRows.forEach(function(row) {
+          var cells = row.querySelectorAll('td');
+          var expiryDate = cells[4].textContent.trim();
+          expiryDates.push(new Date(expiryDate));
+      });
+
+      expiryDates.sort((a, b) => a - b);
+      
+      var ctxExpiryDate = document.getElementById('expiry-date-chart').getContext('2d');
+      new Chart(ctxExpiryDate, {
+          type: 'line',
+          data: {
+              labels: expiryDates.map(date => date.toDateString()),
+              datasets: [{
+                  label: 'Expiry Date Distribution',
+                  data: expiryDates.map(date => date.getTime()),
+                  backgroundColor: '#ff6384',
+                  borderColor: "#ff6384",
+                  fill: false
+              }]
+          },
+          options: {
+              responsive: true,
+              scales: {
+                  x: {
+                      type: 'time',
+                      time: {
+                          unit: 'day'
+                      }
+                  }
+              },
+              plugins: {
+                  legend: {
+                      display: false
+                  },
+                  title: {
+                      display: true,
+                      text: 'Expiry Date Distribution'
+                  }
+              }
+          }
+      });
+    }
+
+    function generateAdditionalCharts() {
+      generateBatchSizeChart();
+      generateExpiryDateChart();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       if (document.querySelector('.tab-link.active').getAttribute('href') === '#visualization') {
-        generatePieCharts();
+          generatePieCharts();
+          generateAdditionalCharts();
       }
     });
-
   </script>
-  
 </body>
 </html>
